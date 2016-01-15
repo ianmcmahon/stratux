@@ -63,7 +63,7 @@ func processNMEASentence(line string) {
 	}
 
 	//log.Printf("Begin parse of %s\n", sentence)
-	message := ParseMessage(sentence)
+	ParseMessage(sentence)
 }
 
 type NMEA struct {
