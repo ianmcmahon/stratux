@@ -14,7 +14,10 @@ func InitGPS() {
 	// eventually I would like to come up with a reliable autodetection scheme for different types of gps.
 	// for now I'll just have entry points into different configurations that get uncommented here
 
-	initUltimateGPS()
+	err := initUltimateGPS()
+	if err != nil {
+		log.Printf("Error initializing gps: %v\n", err)
+	}
 }
 
 
