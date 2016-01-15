@@ -31,17 +31,32 @@ func initUltimateGPS() error {
 
 	// module comes up in 9600baud, 1hz mode
 	serialConfig := &serial.Config{Name: device, Baud: 9600}
+
+	go gpsSerialReader(serialConfig)
+
+	return nil
+}
+
+
+// goroutine which scans for incoming sentences (which are newline terminated) and sends them downstream for processing
+func gpsSerialReader(serialConfig *serial.Config) {
 	p, err := serial.OpenPort(serialConfig)
-	if err != nil { return fmt.Errorf("Error opening serial port: %v", err) }
+	if err != nil { 
+		log.Errorf("Error opening serial port: %v", err) 
+		log.Errorf("  GPS Serial Reader routine is terminating.\n")
+		return
+	}
+	defer p.Close()
 
 	scanner := bufio.NewScanner(p)
 
 	for scanner.Scan() {
-		log.Printf("gps data: %s\n", scanner.Text())
+		line := scanner.Text()
+		log.Printf("gps data: %s\n", line
+
+		processNMEASentence(line)
 	}
 	if err := scanner.Err(); err != nil {
 		log.Printf("Error reading serial data: %v\n", err)
 	}
-
-	return nil
 }
