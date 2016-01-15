@@ -52,7 +52,7 @@ func createChecksummedNMEASentence(raw []byte) []byte {
 		cs_calc ^= v
 	}
 
-	return []byte(fmt.Sprintf("$%s*%02d\r\n", raw, cs_calc))
+	return []byte(fmt.Sprintf("$%s*%02X\r\n", raw, cs_calc))
 }
 
 func processNMEASentence(line string) {

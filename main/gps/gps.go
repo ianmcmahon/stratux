@@ -40,7 +40,7 @@ func initUltimateGPS() error {
 	baud_cfg := createChecksummedNMEASentence([]byte("PMTK251,38400"))
 	log.Printf("checksummed baud cfg: %s\n", baud_cfg)
 
-	n, err = p.Write(baud_cfg)
+	n, err := p.Write(baud_cfg)
 	if err != nil { return err }
 	log.Printf("Wrote %d bytes\n", n)
 
