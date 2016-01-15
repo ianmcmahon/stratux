@@ -19,6 +19,8 @@ import (
 	humanize "github.com/dustin/go-humanize"
 
 	"../uatparse"
+
+	"./gps"
 )
 
 // http://www.faa.gov/nextgen/programs/adsb/wsa/media/GDL90_Public_ICD_RevA.PDF
@@ -1280,7 +1282,10 @@ func main() {
 	// Mark the files (whether we're logging or not).
 	replayMark(globalSettings.ReplayLog)
 
-	initRY835AI()
+
+	gps.InitGPS()
+
+	//initRY835AI()
 
 	// Start the heartbeat message loop in the background, once per second.
 	go heartBeatSender()
