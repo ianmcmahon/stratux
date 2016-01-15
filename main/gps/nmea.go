@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"reflect"
 )
 
 // func validateNMEAChecksum determines if a string is a properly formatted NMEA sentence with a valid checksum.
@@ -76,6 +77,14 @@ func ParseMessage(sentence string) *NMEA {
 
 	log.Printf("NMEA Message type %s, data: %v\n", n.Tokens[0], n.Tokens[1:])
 
+	v := reflect.ValueOf(n)
+	m := v.MethodByName(n.Tokens[0])
+
+	log.Printf("found reflect method: %v\n", m)
+
 	return n
 }
 
+func (n *NMEA) GPGSA() {
+	log.Printf("In GPGSA\n")
+}
