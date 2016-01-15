@@ -52,4 +52,6 @@ func processNMEASentence(line string) {
 		log.Printf("GPS Error: invalid NMEA string: %s\n", sentence)
 		return 
 	}
+
+	log.Printf("Begin parse of %s\n", sentence)
 }

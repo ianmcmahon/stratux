@@ -51,7 +51,7 @@ func gpsSerialReader(serialConfig *serial.Config) {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		log.Printf("gps data: %s\n", line)
+		//log.Printf("gps data: %s\n", line)
 
 		processNMEASentence(line)
 	}
