@@ -43,7 +43,7 @@ func initUltimateGPS() error {
 	p.Close()
 
 
-	serialConfig.Baud = 115200
+	//serialConfig.Baud = 115200
 
 	go gpsSerialReader(serialConfig)
 
@@ -54,6 +54,7 @@ func initUltimateGPS() error {
 // goroutine which scans for incoming sentences (which are newline terminated) and sends them downstream for processing
 func gpsSerialReader(serialConfig *serial.Config) {
 	p, err := serial.OpenPort(serialConfig)
+	log.Printf("Opening GPS on %s at %sbaud\n", serialConfig.Name, serialConfig.Baud) 
 	if err != nil { 
 		log.Printf("Error opening serial port: %v", err) 
 		log.Printf("  GPS Serial Reader routine is terminating.\n")
