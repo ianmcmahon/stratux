@@ -74,6 +74,8 @@ type NMEA struct {
 func ParseMessage(sentence string) *NMEA {
 	n := &NMEA{ sentence, strings.Split(sentence, ",") }
 
-	log.Printf("NMEA Message type %s, data: %v\n", Tokens[0], Tokens[1:])
+	log.Printf("NMEA Message type %s, data: %v\n", n.Tokens[0], n.Tokens[1:])
+
+	return n
 }
 
