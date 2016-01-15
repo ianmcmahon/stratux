@@ -37,8 +37,12 @@ func initUltimateGPS() error {
 	p, err := serial.OpenPort(serialConfig)
 	if err != nil { return err }
 
-	_, err = p.Write(createChecksummedNMEASentence([]byte("PMTK251,115200")))
+	baud_cfg := createChecksummedNMEASentence([]byte("PMTK251,38400"))
+	log.Printf("checksummed baud cfg: %s\n", baud_cfg)
+
+	n, err = p.Write(baud_cfg)
 	if err != nil { return err }
+	log.Printf("Wrote %d bytes\n", n)
 
 	p.Close()
 
@@ -54,7 +58,7 @@ func initUltimateGPS() error {
 // goroutine which scans for incoming sentences (which are newline terminated) and sends them downstream for processing
 func gpsSerialReader(serialConfig *serial.Config) {
 	p, err := serial.OpenPort(serialConfig)
-	log.Printf("Opening GPS on %s at %sbaud\n", serialConfig.Name, serialConfig.Baud) 
+	log.Printf("Opening GPS on %s at %dbaud\n", serialConfig.Name, serialConfig.Baud) 
 	if err != nil { 
 		log.Printf("Error opening serial port: %v", err) 
 		log.Printf("  GPS Serial Reader routine is terminating.\n")
