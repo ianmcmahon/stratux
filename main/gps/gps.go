@@ -4,6 +4,7 @@ import (
 	"log"
 	"bufio"
 	"io"
+	"time"
 	
 	"github.com/tarm/serial"
 )
@@ -25,7 +26,7 @@ func InitGPS() {
 // GPS should provide some valid sentence at least once per second.  
 // If I don't receive something in two seconds, this probably isn't a valid config
 func detectGPS(config *serial.Config) (bool, error) {
-	p, err := serial.OpenPort(serialConfig)
+	p, err := serial.OpenPort(config)
 	if err != nil { return false, err }
 	defer p.Close()
 
@@ -78,7 +79,7 @@ func initUltimateGPS() error {
 	}
 
 	serialConfig.Baud = 38400
-	valid, err := detectGPS(serialConfig)
+	valid, err = detectGPS(serialConfig)
 	if err != nil { return err }
 	if valid {
 		log.Printf("Detected GPS on %s at %dbaud!\n", serialConfig.Name, serialConfig.Baud)
