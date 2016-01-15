@@ -3,7 +3,6 @@ package gps
 import (
 	"log"
 	"bufio"
-	"io"
 	"time"
 	
 	"github.com/tarm/serial"
@@ -32,10 +31,12 @@ func detectGPS(config *serial.Config) (bool, error) {
 	defer p.Close()
 
 	lr := linereader.New(p)
+	lr.Timeout = time.Second * 3
 
 	for {
 		select { 
 		case line := <-lr.Ch:
+			log.Printf("Got line from linereader: %v\n", line)
 			if sentence, valid := validateNMEAChecksum(line); valid {
 				log.Println("Valid sentence %s on %s:%d\n", sentence, config.Name, config.Baud)
 				return true, nil
