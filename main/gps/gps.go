@@ -1,6 +1,7 @@
 package gps
 
 import (
+	"fmt"
 	"log"
 	"bufio"
 	"time"
@@ -31,21 +32,60 @@ func detectGPS(config *serial.Config) (bool, error) {
 	defer p.Close()
 
 	lr := linereader.New(p)
-	lr.Timeout = time.Second * 3
+	lr.Timeout = time.Second * 2
 
 	for {
 		select { 
 		case line := <-lr.Ch:
 			log.Printf("Got line from linereader: %v\n", line)
 			if sentence, valid := validateNMEAChecksum(line); valid {
-				log.Println("Valid sentence %s on %s:%d\n", sentence, config.Name, config.Baud)
+				log.Printf("Valid sentence %s on %s:%d\n", sentence, config.Name, config.Baud)
 				return true, nil
 			}
-		case <-time.After(time.Second * 3):
-			log.Println("timeout reached on %s:%d\n", config.Name, config.Baud)
+		case <-time.After(time.Second * 2):
+			log.Printf("timeout reached on %s:%d\n", config.Name, config.Baud)
 			return false, nil
 		}
 	}
+}
+
+func findGPS() *serial.Config {
+	// ports and baud rates are listed in the order they should be tried
+	ports := []string{ "/dev/ttyAMA0", "/dev/ttyACM0", "/dev/ttyUSB0" }
+	rates := []int{ 38400, 9600, 4800 }
+
+	for _, port := range ports {
+		for _, rate := range rates {
+			config := &serial.Config{Name: port, Baud: rate}
+			if valid, err := detectGPS(config); valid { return config } else { 
+				if err != nil { log.Printf("Error detecting GPS: %v\n", err) }
+			}
+		}
+	}
+	return nil
+}
+
+func changeGPSBaudRate(config *serial.Config, newRate int) error {
+	if config.Baud == newRate {
+		return nil
+	}
+
+	p, err := serial.OpenPort(serialConfig)
+	if err != nil { return err }
+	defer p.Close()
+
+	baud_cfg := createChecksummedNMEASentence([]byte(fmt.Sprintf("PMTK251,%d", newRate))
+
+	n, err := p.Write(baud_cfg)
+	if err != nil { return err }
+
+	config.Baud = newRate
+
+	valid, err := detectGPS(config)
+	if !valid {
+		err = fmt.Errorf("Set GPS to new rate, but unable to detect it at that new rate!")
+	}
+	return err
 }
 
 
@@ -57,41 +97,14 @@ func initUltimateGPS() error {
 	device := "/dev/ttyAMA0"
 	log.Printf("Using %s for GPS\n", device)
 
-	// module comes up in 9600baud, 1hz mode
-	serialConfig := &serial.Config{Name: device, Baud: 9600}
-
-	valid, err := detectGPS(serialConfig)
-	if err != nil { return err }
-	if valid {
-		log.Printf("Detected GPS on %s at %dbaud!\n", serialConfig.Name, serialConfig.Baud)
+	serialConfig := findGPS()
+	if serialConfig == nil {
+		return fmt.Errorf("Couldn't find gps module anywhere!  We looked!")
 	}
 
-	serialConfig.Baud = 38400
-	valid, err = detectGPS(serialConfig)
-	if err != nil { return err }
-	if valid {
-		log.Printf("Detected GPS on %s at %dbaud!\n", serialConfig.Name, serialConfig.Baud)
+	if serialConfig.Baud != 38400 {
+		changeGPSBaudRate(serialConfig, 38400)
 	}
-
-
-
-	// baud rate configuration string:
-	// PMTK251,115200
-
-	p, err := serial.OpenPort(serialConfig)
-	if err != nil { return err }
-
-	baud_cfg := createChecksummedNMEASentence([]byte("PMTK251,38400"))
-	log.Printf("checksummed baud cfg: %s\n", baud_cfg)
-
-	n, err := p.Write(baud_cfg)
-	if err != nil { return err }
-	log.Printf("Wrote %d bytes\n", n)
-
-	p.Close()
-
-
-	//serialConfig.Baud = 115200
 
 	go gpsSerialReader(serialConfig)
 
