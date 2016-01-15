@@ -1,7 +1,6 @@
 package gps
 
 import (
-	"fmt"
 	"log"
 	"bufio"
 	
@@ -42,8 +41,8 @@ func initUltimateGPS() error {
 func gpsSerialReader(serialConfig *serial.Config) {
 	p, err := serial.OpenPort(serialConfig)
 	if err != nil { 
-		log.Errorf("Error opening serial port: %v", err) 
-		log.Errorf("  GPS Serial Reader routine is terminating.\n")
+		log.Printf("Error opening serial port: %v", err) 
+		log.Printf("  GPS Serial Reader routine is terminating.\n")
 		return
 	}
 	defer p.Close()
@@ -52,7 +51,7 @@ func gpsSerialReader(serialConfig *serial.Config) {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		log.Printf("gps data: %s\n", line
+		log.Printf("gps data: %s\n", line)
 
 		processNMEASentence(line)
 	}

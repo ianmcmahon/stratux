@@ -1,5 +1,11 @@
 package gps
 
+import (
+	"strings"
+	"fmt"
+	"log"
+	"strconv"
+)
 
 // func validateNMEAChecksum determines if a string is a properly formatted NMEA sentence with a valid checksum.
 //
