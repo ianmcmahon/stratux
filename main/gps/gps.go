@@ -7,6 +7,7 @@ import (
 	"time"
 	
 	"github.com/tarm/serial"
+	"github.com/mitchellh/go-linereader"
 )
 
 func InitGPS() {
@@ -30,33 +31,19 @@ func detectGPS(config *serial.Config) (bool, error) {
 	if err != nil { return false, err }
 	defer p.Close()
 
-	ch := make(chan bool)
+	lr := linereader.New(p)
 
-	timeout := false
-
-	// this function attempts to scan lines until it gets one which is a valid sentence, then it 
-	// chucks a token on the channel signifying success and exits
-	go func(r io.Reader) {
-		scanner := bufio.NewScanner(r)
-		for scanner.Scan() {
-			if timeout { 
-				log.Printf("exiting detect %s:%d loop due to timeout\n")
-				return 
+	for {
+		select { 
+		case line := <-lr.Ch:
+			if sentence, valid := validateNMEAChecksum(line); valid {
+				log.Println("Valid sentence %s on %s:%d\n", sentence, config.Name, config.Baud)
+				return true, nil
 			}
-			line := scanner.Text()
-			if _, valid := validateNMEAChecksum(line); valid {
-				ch<-true
-				log.Printf("exiting detect %s:%d loop due to success\n")
-				return
-			}
+		case <-time.After(time.Second * 3):
+			log.Println("timeout reached on %s:%d\n", config.Name, config.Baud)
+			return false, nil
 		}
-	}(p)
-
-	select { 
-	case <-ch:
-		return true, nil
-	case <-time.After(time.Second * 3):
-		return false, nil
 	}
 }
 
