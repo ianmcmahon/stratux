@@ -63,4 +63,17 @@ func processNMEASentence(line string) {
 	}
 
 	//log.Printf("Begin parse of %s\n", sentence)
+	message := ParseMessage(sentence)
 }
+
+type NMEA struct {
+	Sentence string
+	Tokens []string
+}
+
+func ParseMessage(sentence string) *NMEA {
+	n := &NMEA{ sentence, strings.Split(sentence, ",") }
+
+	log.Printf("NMEA Message type %s, data: %v\n", Tokens[0], Tokens[1:])
+}
+

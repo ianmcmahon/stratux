@@ -80,7 +80,7 @@ func changeGPSBaudRate(config *serial.Config, newRate int) error {
 
 	baud_cfg := createChecksummedNMEASentence([]byte(fmt.Sprintf("PMTK251,%d", newRate)))
 
-	n, err := p.Write(baud_cfg)
+	_, err = p.Write(baud_cfg)
 	if err != nil { return err }
 
 	config.Baud = newRate
