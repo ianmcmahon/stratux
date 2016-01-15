@@ -1283,7 +1283,10 @@ func main() {
 	replayMark(globalSettings.ReplayLog)
 
 
-	gps.InitGPS()
+	err = gps.InitGPS()
+	if err != nil {
+		log.Printf("Error initializing gps: %v\n", err)
+	}
 
 	//initRY835AI()
 
