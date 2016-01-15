@@ -80,7 +80,11 @@ func ParseMessage(sentence string) *NMEA {
 	v := reflect.ValueOf(n)
 	m := v.MethodByName(n.Tokens[0])
 
-	log.Printf("found reflect method: %v\n", m)
+	if (m == reflect.Value{}) {
+		return nil
+	}
+
+	m.Call(nil)
 
 	return n
 }
