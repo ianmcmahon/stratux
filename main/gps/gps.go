@@ -34,8 +34,16 @@ func initUltimateGPS() error {
 	// baud rate configuration string:
 	// PMTK251,115200
 
-	log.Printf("Checksummed baudrate config string: %v\n", createChecksummedNMEASentence([]byte("PMTK251,115200")))
+	p, err := serial.OpenPort(serialConfig)
+	if err != nil { return err }
 
+	_, err = p.Write(createChecksummedNMEASentence([]byte("PMTK251,115200")))
+	if err != nil { return err }
+
+	p.Close()
+
+
+	serialConfig.Baud = 115200
 
 	go gpsSerialReader(serialConfig)
 
