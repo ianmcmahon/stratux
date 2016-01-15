@@ -31,6 +31,12 @@ func initUltimateGPS() error {
 	// module comes up in 9600baud, 1hz mode
 	serialConfig := &serial.Config{Name: device, Baud: 9600}
 
+	// baud rate configuration string:
+	// PMTK251,115200
+
+	log.Printf("Checksummed baudrate config string: %v\n", createChecksummedNMEASentence("PMTK251,115200"))
+
+
 	go gpsSerialReader(serialConfig)
 
 	return nil

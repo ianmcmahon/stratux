@@ -46,6 +46,15 @@ func validateNMEAChecksum(s string) (string, bool) {
 	return s_out, true
 }
 
+func createChecksummedNMEASentence(raw string) string {
+	cs_calc := byte(0)
+	for _,v := range raw {
+		cs_calc ^= v
+	}
+
+	return fmt.Sprintf("$%s*%02d\r\n", raw, cs_calc)
+}
+
 func processNMEASentence(line string) {
 	sentence, valid := validateNMEAChecksum(line)
 	if !valid {
