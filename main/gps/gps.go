@@ -57,8 +57,12 @@ func findGPS() *serial.Config {
 	for _, port := range ports {
 		for _, rate := range rates {
 			config := &serial.Config{Name: port, Baud: rate}
-			if valid, err := detectGPS(config); valid { return config } else { 
-				if err != nil { log.Printf("Error detecting GPS: %v\n", err) }
+			if valid, err := detectGPS(config); valid { 
+				return config 
+			} else { 
+				if err != nil { 
+					log.Printf("Error detecting GPS: %v\n", err) 
+				}
 			}
 		}
 	}
@@ -70,11 +74,11 @@ func changeGPSBaudRate(config *serial.Config, newRate int) error {
 		return nil
 	}
 
-	p, err := serial.OpenPort(serialConfig)
+	p, err := serial.OpenPort(config)
 	if err != nil { return err }
 	defer p.Close()
 
-	baud_cfg := createChecksummedNMEASentence([]byte(fmt.Sprintf("PMTK251,%d", newRate))
+	baud_cfg := createChecksummedNMEASentence([]byte(fmt.Sprintf("PMTK251,%d", newRate)))
 
 	n, err := p.Write(baud_cfg)
 	if err != nil { return err }
