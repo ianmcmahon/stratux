@@ -3,6 +3,7 @@ package gps
 import (
 	"log"
 	"bufio"
+	"io"
 	
 	"github.com/tarm/serial"
 )
@@ -20,6 +21,45 @@ func InitGPS() {
 }
 
 
+// this works based on a channel/goroutine based timeout pattern
+// GPS should provide some valid sentence at least once per second.  
+// If I don't receive something in two seconds, this probably isn't a valid config
+func detectGPS(config *serial.Config) (bool, error) {
+	p, err := serial.OpenPort(serialConfig)
+	if err != nil { return false, err }
+	defer p.Close()
+
+	ch := make(chan bool)
+
+	timeout := false
+
+	// this function attempts to scan lines until it gets one which is a valid sentence, then it 
+	// chucks a token on the channel signifying success and exits
+	go func(r io.Reader) {
+		scanner := bufio.NewScanner(r)
+		for scanner.Scan() {
+			if timeout { 
+				log.Printf("exiting detect %s:%d loop due to timeout\n")
+				return 
+			}
+			line := scanner.Text()
+			if _, valid := validateNMEAChecksum(line); valid {
+				ch<-true
+				log.Printf("exiting detect %s:%d loop due to success\n")
+				return
+			}
+		}
+	}(p)
+
+	select { 
+	case <-ch:
+		return true, nil
+	case <-time.After(time.Second * 3):
+		return false, nil
+	}
+}
+
+
 // for the Adafruit Ultimate GPS Hat (https://www.adafruit.com/products/2324)
 // MT3339 chipset
 func initUltimateGPS() error {
@@ -31,6 +71,21 @@ func initUltimateGPS() error {
 	// module comes up in 9600baud, 1hz mode
 	serialConfig := &serial.Config{Name: device, Baud: 9600}
 
+	valid, err := detectGPS(serialConfig)
+	if err != nil { return err }
+	if valid {
+		log.Printf("Detected GPS on %s at %dbaud!\n", serialConfig.Name, serialConfig.Baud)
+	}
+
+	serialConfig.Baud = 38400
+	valid, err := detectGPS(serialConfig)
+	if err != nil { return err }
+	if valid {
+		log.Printf("Detected GPS on %s at %dbaud!\n", serialConfig.Name, serialConfig.Baud)
+	}
+
+
+
 	// baud rate configuration string:
 	// PMTK251,115200
 
@@ -40,7 +95,7 @@ func initUltimateGPS() error {
 	baud_cfg := createChecksummedNMEASentence([]byte("PMTK251,38400"))
 	log.Printf("checksummed baud cfg: %s\n", baud_cfg)
 
-	n, err = p.Write(baud_cfg)
+	n, err := p.Write(baud_cfg)
 	if err != nil { return err }
 	log.Printf("Wrote %d bytes\n", n)
 

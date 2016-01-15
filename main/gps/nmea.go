@@ -62,5 +62,5 @@ func processNMEASentence(line string) {
 		return 
 	}
 
-	log.Printf("Begin parse of %s\n", sentence)
+	//log.Printf("Begin parse of %s\n", sentence)
 }
