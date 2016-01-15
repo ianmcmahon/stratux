@@ -1,6 +1,7 @@
 package gps
 
 import (
+	"fmt"
 	"log"
 	"bufio"
 	
@@ -38,4 +39,6 @@ func initUltimateGPS() error {
 	if err := scanner.Err(); err != nil {
 		log.Printf("Error reading serial data: %v\n", err)
 	}
+
+	return nil
 }
