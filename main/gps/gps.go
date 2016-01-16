@@ -26,6 +26,8 @@ func InitGPS() error {
 	// and call the appropriate configuration routine for the chip
 
 	go gpsSerialReader(serialConfig)
+
+	return nil
 }
 
 
