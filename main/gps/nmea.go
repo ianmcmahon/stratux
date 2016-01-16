@@ -139,8 +139,8 @@ func (n *NMEA) GPGGA() {
 	alt, err := strconv.ParseFloat(n.Tokens[9], 32); if err != nil { return }
 	s.Alt = float32(alt * 3.28084) // meters to feet
 
-	∆geoid, err := strconv.ParseFloat(n.Tokens[11], 32); if err != nil { return }
-	s.GeoidSep = float32(∆geoid * 3.28084) // meters to feet
+	geoid, err := strconv.ParseFloat(n.Tokens[11], 32); if err != nil { return }
+	s.GeoidSep = float32(geoid * 3.28084) // meters to feet
 
 	// s.LastFixLocalTime = stratuxClock.Time 
 
