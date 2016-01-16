@@ -704,7 +704,7 @@ func processNMEALine(l string) bool {
 		if err1 != nil || err2 != nil || err3 != nil {
 			return false
 		}
-		mySituation.lastFixSinceMidnightUTC = uint32((hr * 60 * 60) + (min * 60) + sec)
+		mySituation.LastFixSinceMidnightUTC = uint32((hr * 60 * 60) + (min * 60) + sec)
 
 		if len(x[9]) == 6 {
 			// Date of Fix, i.e 191115 =  19 November 2015 UTC  field 9
