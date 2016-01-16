@@ -92,12 +92,12 @@ func ParseMessage(sentence string, situation *SituationData) *NMEA {
 	return n
 }
 
-func durationSinceMidnight(fixtime string) (time.Duration, error) {
+func durationSinceMidnight(fixtime string) (int, error) {
 	hr, err := strconv.Atoi(fixtime[0:2]); if err != nil { return err }
 	min, err := strconv.Atoi(fixtime[2:4]); if err != nil { return err }
 	sec, err := strconv.Atoi(fixtime[4:6]); if err != nil { return err }
 
-	return time.Second * sec + time.Minute * min + time.Hour * hr
+	return sec + min*60 + hr*60*60, nil
 }
 
 func parseLatLon(s string, neg bool) (float32, error) {
@@ -107,7 +107,7 @@ func parseLatLon(s string, neg bool) (float32, error) {
 
 	sign := 1; if neg { sign = -1 }
 
-	return sign * (float32(deg) + float32(min/60.0)), nil 
+	return float32(sign) * (float32(deg) + float32(min/60.0)), nil 
 }
 
 func (n *NMEA) GNGGA() { n.GPGGA() } // ublox 8 uses GNGGA in place of GPGGA to indicate multiple nav sources (GPS/GLONASS)
@@ -118,14 +118,14 @@ func (n *NMEA) GPGGA() {
 	s.Mu_GPS.Lock(); defer s.Mu_GPS.Unlock()
 
 	d, err := durationSinceMidnight(n.Tokens[1]); if err != nil { return }
-	s.LastFixSinceMidnight = uint32(durationSinceMidnight(n.Tokens[1]) / time.Second)
+	s.LastFixSinceMidnightUTC = uint32(d)
 
 	if len(n.Tokens[2]) < 4 || len(n.Tokens[4]) < 4 { return } // sanity check lat/lon
 
 	lat, err := parseLatLon(n.Tokens[2], n.Tokens[3] == "S"); if err != nil { return }
 	lon, err := parseLatLon(n.Tokens[4], n.Tokens[5] == "W"); if err != nil { return }
 
-	s.Lat = lat; s.Lon = lon
+	s.Lat = lat; s.Lng = lon
 
 	log.Printf("Situation: %v\n", s)
 }
