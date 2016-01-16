@@ -56,7 +56,7 @@ func createChecksummedNMEASentence(raw []byte) []byte {
 	return []byte(fmt.Sprintf("$%s*%02X\r\n", raw, cs_calc))
 }
 
-func processNMEASentence(line string) {
+func processNMEASentence(line string, situation *SituationData) {
 	sentence, valid := validateNMEAChecksum(line)
 	if !valid {
 		log.Printf("GPS Error: invalid NMEA string: %s\n", sentence)
@@ -64,18 +64,20 @@ func processNMEASentence(line string) {
 	}
 
 	//log.Printf("Begin parse of %s\n", sentence)
-	ParseMessage(sentence)
+	ParseMessage(sentence, situation)
 }
 
 type NMEA struct {
 	Sentence string
 	Tokens []string
+	Situation *SituationData
 }
 
-func ParseMessage(sentence string) *NMEA {
-	n := &NMEA{ sentence, strings.Split(sentence, ",") }
+// we split the sentence on commas, and use the first field via reflection to find a method with the same name
+func ParseMessage(sentence string, situation *SituationData) *NMEA {
+	n := &NMEA{ sentence, strings.Split(sentence, ","), situation }
 
-	log.Printf("NMEA Message type %s, data: %v\n", n.Tokens[0], n.Tokens[1:])
+	//log.Printf("NMEA Message type %s, data: %v\n", n.Tokens[0], n.Tokens[1:])
 
 	v := reflect.ValueOf(n)
 	m := v.MethodByName(n.Tokens[0])
@@ -89,6 +91,47 @@ func ParseMessage(sentence string) *NMEA {
 	return n
 }
 
+func durationSinceMidnight(fixtime int) (time.Duration, error) {
+	hr, err := strconv.Atoi(fixtime[0:2]); if err != nil { return err }
+	min, err := strconv.Atoi(fixtime[2:4]); if err != nil { return err }
+	sec, err := strconv.Atoi(fixtime[4:6]); if err != nil { return err }
+
+	return time.Second * sec + time.Minute * min + time.Hour * hr
+}
+
+func parseLatLon(s string, neg bool) (float32, error) {
+	minpos := len(s) - 6
+	deg, err := strconv.Atoi(s[0:minpos]); if err != nil { return 0.0, err }
+	min, err := strconv.ParseFloat(s[minpos:], 32); if err != nil { return 0.0, err }
+
+	sign := 1; if neg { sign = -1 }
+
+	return sign * (deg + float32(min/60.0))
+}
+
+func (n *NMEA) GNGGA() { n.GPGGA() } // ublox 8 uses GNGGA in place of GPGGA to indicate multiple nav sources (GPS/GLONASS)
+func (n *NMEA) GPGGA() {
+	log.Printf("In GPGGA\n")
+	s := n.Situation
+
+	s.Mu_GPS.Lock(); defer s.Mu_GPS.Unlock()
+
+	d, err := durationSinceMidnight(n.Tokens[1]) if err != nil { return }
+	s.LastFixSinceMidnight = uint32(durationSinceMidnight(n.Tokens[1]) / time.Second)
+
+	if len(n.Tokens[2]) < 4 || len(n.Tokens[4]) < 4 { return } // sanity check lat/lon
+
+	lat, err := parseLatLon(n.Tokens[2], n.Tokens[3] == "S"); if err != nil { return }
+	lon, err := parseLatLon(n.Tokens[4], n.Tokens[5] == "W"); if err != nil { return }
+
+	s.Lat = lat; s.Lon = lon
+
+	log.Printf("Situation: %v\n", s)
+}
+
+
 func (n *NMEA) GPGSA() {
 	log.Printf("In GPGSA\n")
+
+
 }

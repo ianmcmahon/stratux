@@ -1283,7 +1283,7 @@ func main() {
 	replayMark(globalSettings.ReplayLog)
 
 
-	gps.InitGPS()
+	gps.InitGPS(mySituation)
 
 	//initRY835AI()
 

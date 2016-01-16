@@ -10,7 +10,7 @@ import (
 	"github.com/mitchellh/go-linereader"
 )
 
-func InitGPS() error {
+func InitGPS(situation *SituationData) error {
 	log.Printf("In gps.InitGPS()\n")
 
 	serialConfig := findGPS()
@@ -25,7 +25,7 @@ func InitGPS() error {
 	// TODO:  try to detect the chipset type (ublox/globaltop/whatever)
 	// and call the appropriate configuration routine for the chip
 
-	go gpsSerialReader(serialConfig)
+	go gpsSerialReader(serialConfig, situation)
 
 	return nil
 }
@@ -102,7 +102,7 @@ func changeGPSBaudRate(config *serial.Config, newRate int) error {
 
 
 // goroutine which scans for incoming sentences (which are newline terminated) and sends them downstream for processing
-func gpsSerialReader(serialConfig *serial.Config) {
+func gpsSerialReader(serialConfig *serial.Config, situation *SituationData) {
 	p, err := serial.OpenPort(serialConfig)
 	log.Printf("Opening GPS on %s at %dbaud\n", serialConfig.Name, serialConfig.Baud) 
 	if err != nil { 
@@ -118,7 +118,7 @@ func gpsSerialReader(serialConfig *serial.Config) {
 		line := scanner.Text()
 		//log.Printf("gps data: %s\n", line)
 
-		processNMEASentence(line)
+		processNMEASentence(line, situation)
 	}
 	if err := scanner.Err(); err != nil {
 		log.Printf("Error reading serial data: %v\n", err)
