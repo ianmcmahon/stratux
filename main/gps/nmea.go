@@ -6,7 +6,6 @@ import (
 	"log"
 	"strconv"
 	"reflect"
-	"time"
 )
 
 // func validateNMEAChecksum determines if a string is a properly formatted NMEA sentence with a valid checksum.
@@ -93,9 +92,9 @@ func ParseMessage(sentence string, situation *SituationData) *NMEA {
 }
 
 func durationSinceMidnight(fixtime string) (int, error) {
-	hr, err := strconv.Atoi(fixtime[0:2]); if err != nil { return err }
-	min, err := strconv.Atoi(fixtime[2:4]); if err != nil { return err }
-	sec, err := strconv.Atoi(fixtime[4:6]); if err != nil { return err }
+	hr, err := strconv.Atoi(fixtime[0:2]); if err != nil { return 0, err }
+	min, err := strconv.Atoi(fixtime[2:4]); if err != nil { return 0, err }
+	sec, err := strconv.Atoi(fixtime[4:6]); if err != nil { return 0, err }
 
 	return sec + min*60 + hr*60*60, nil
 }
