@@ -10,16 +10,22 @@ import (
 	"github.com/mitchellh/go-linereader"
 )
 
-func InitGPS() {
+func InitGPS() error {
 	log.Printf("In gps.InitGPS()\n")
 
-	// eventually I would like to come up with a reliable autodetection scheme for different types of gps.
-	// for now I'll just have entry points into different configurations that get uncommented here
-
-	err := initUltimateGPS()
-	if err != nil {
-		log.Printf("Error initializing gps: %v\n", err)
+	serialConfig := findGPS()
+	if serialConfig == nil {
+		return fmt.Errorf("Couldn't find gps module anywhere!  We looked!")
 	}
+
+	if serialConfig.Baud != 38400 {
+		changeGPSBaudRate(serialConfig, 38400)
+	}
+
+	// TODO:  try to detect the chipset type (ublox/globaltop/whatever)
+	// and call the appropriate configuration routine for the chip
+
+	go gpsSerialReader(serialConfig)
 }
 
 
@@ -90,29 +96,6 @@ func changeGPSBaudRate(config *serial.Config, newRate int) error {
 		err = fmt.Errorf("Set GPS to new rate, but unable to detect it at that new rate!")
 	}
 	return err
-}
-
-
-// for the Adafruit Ultimate GPS Hat (https://www.adafruit.com/products/2324)
-// MT3339 chipset
-func initUltimateGPS() error {
-
-	// module is attached via serial UART, shows up as /dev/ttyAMA0 on rpi
-	device := "/dev/ttyAMA0"
-	log.Printf("Using %s for GPS\n", device)
-
-	serialConfig := findGPS()
-	if serialConfig == nil {
-		return fmt.Errorf("Couldn't find gps module anywhere!  We looked!")
-	}
-
-	if serialConfig.Baud != 38400 {
-		changeGPSBaudRate(serialConfig, 38400)
-	}
-
-	go gpsSerialReader(serialConfig)
-
-	return nil
 }
 
 
