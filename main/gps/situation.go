@@ -32,7 +32,7 @@ type SituationData struct {
 	// From BMP180 pressure sensor.
 	Temp              float64
 	Pressure_alt      float64
-	lastTempPressTime time.Time
+	LastTempPressTime time.Time
 
 	// From MPU6050 accel/gyro.
 	Pitch            float64
