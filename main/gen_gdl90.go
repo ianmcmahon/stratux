@@ -76,7 +76,7 @@ var stratuxVersion string
 var Crc16Table [256]uint16
 
 // Current AHRS, pressure altitude, etc.
-var mySituation SituationData
+var mySituation *gps.SituationData = &gps.SituationData{}
 
 type WriteCloser interface {
 	io.Writer
@@ -1283,7 +1283,7 @@ func main() {
 	replayMark(globalSettings.ReplayLog)
 
 
-	gps.InitGPS()
+	gps.InitGPS(mySituation)
 
 	//initRY835AI()
 
