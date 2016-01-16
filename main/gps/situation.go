@@ -6,13 +6,13 @@ import (
 )
 
 type SituationData struct {
-	mu_GPS *sync.Mutex
+	Mu_GPS *sync.Mutex
 
 	// From GPS.
-	lastFixSinceMidnightUTC uint32
+	LastFixSinceMidnightUTC uint32
 	Lat                     float32
 	Lng                     float32
-	quality                 uint8
+	Quality                 uint8
 	GeoidSep                float32 // geoid separation, ft, MSL minus HAE (used in altitude calculation)
 	Satellites              uint16  // satellites used in solution
 	SatellitesTracked       uint16  // satellites tracked (almanac data received)
@@ -27,7 +27,7 @@ type SituationData struct {
 	GroundSpeed             uint16
 	LastGroundTrackTime     time.Time
 
-	mu_Attitude *sync.Mutex
+	Mu_Attitude *sync.Mutex
 
 	// From BMP180 pressure sensor.
 	Temp              float64

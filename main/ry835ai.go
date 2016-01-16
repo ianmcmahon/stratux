@@ -328,8 +328,8 @@ func processNMEALine(l string) bool {
 				return false
 			}
 
-			mySituation.mu_GPS.Lock()
-			defer mySituation.mu_GPS.Unlock()
+			mySituation.Mu_GPS.Lock()
+			defer mySituation.Mu_GPS.Unlock()
 
 			// field 2 = time
 			if len(x[2]) < 9 {
@@ -389,16 +389,16 @@ func processNMEALine(l string) bool {
 			// DR = dead reckoning, G2= 2D GPS, G3 = 3D GPS, D2= 2D diff, D3 = 3D diff, RK = GPS+DR, TT = time only
 
 			if x[8] == "D2" || x[8] == "D3" {
-				mySituation.quality = 2
+				mySituation.Quality = 2
 			} else if x[8] == "G2" || x[8] == "G3" {
-				mySituation.quality = 1
+				mySituation.Quality = 1
 			} else if x[8] == "DR" || x[8] == "RK" {
-				mySituation.quality = 6
+				mySituation.Quality = 6
 			} else if x[8] == "NF" {
-				mySituation.quality = 0
+				mySituation.Quality = 0
 				return false // return false if no valid fix.
 			} else {
-				mySituation.quality = 0
+				mySituation.Quality = 0
 			}
 
 			// field 9 = horizontal accuracy, m
@@ -543,8 +543,8 @@ func processNMEALine(l string) bool {
 
 		// otherwise parse the NMEA standard messages as a fall-back / compatibility option
 	} else if (x[0] == "GNVTG") || (x[0] == "GPVTG") { // Ground track information.
-		mySituation.mu_GPS.Lock()
-		defer mySituation.mu_GPS.Unlock()
+		mySituation.Mu_GPS.Lock()
+		defer mySituation.Mu_GPS.Unlock()
 		if len(x) < 10 {
 			return false
 		}
@@ -577,8 +577,8 @@ func processNMEALine(l string) bool {
 		if len(x) < 15 {
 			return false
 		}
-		mySituation.mu_GPS.Lock()
-		defer mySituation.mu_GPS.Unlock()
+		mySituation.Mu_GPS.Lock()
+		defer mySituation.Mu_GPS.Unlock()
 		// Timestamp.
 		if len(x[1]) < 9 {
 			return false
@@ -628,7 +628,7 @@ func processNMEALine(l string) bool {
 		if err1 != nil {
 			return false
 		}
-		mySituation.quality = uint8(q) // 1 = 3D GPS; 2 = DGPS (SBAS /WAAS)
+		mySituation.Quality = uint8(q) // 1 = 3D GPS; 2 = DGPS (SBAS /WAAS)
 
 		/* Satellite count and horizontal accuracy deprecated. Using PUBX,00 with fallback to GSA.
 		// Satellites.
@@ -691,8 +691,8 @@ func processNMEALine(l string) bool {
 		if len(x) < 12 {
 			return false
 		}
-		mySituation.mu_GPS.Lock()
-		defer mySituation.mu_GPS.Unlock()
+		mySituation.Mu_GPS.Lock()
+		defer mySituation.Mu_GPS.Unlock()
 
 		// Timestamp.
 		if len(x[1]) < 9 {
@@ -804,7 +804,7 @@ func processNMEALine(l string) bool {
 		if err1 != nil {
 			return false
 		}
-		if mySituation.quality == 2 {
+		if mySituation.Quality == 2 {
 			mySituation.Accuracy = float32(hdop * 4.0) // Rough 95% confidence estimate for WAAS / DGPS solution
 		} else {
 			mySituation.Accuracy = float32(hdop * 8.0) // Rough 95% confidence estimate for 3D non-WAAS solution
@@ -958,7 +958,7 @@ func attitudeReaderSender() {
 			break
 		}
 
-		mySituation.mu_Attitude.Lock()
+		mySituation.Mu_Attitude.Lock()
 
 		mySituation.Pitch = pitch
 		mySituation.Roll = roll
@@ -971,7 +971,7 @@ func attitudeReaderSender() {
 		makeFFAHRSSimReport()
 		makeAHRSGDL90Report()
 
-		mySituation.mu_Attitude.Unlock()
+		mySituation.Mu_Attitude.Unlock()
 	}
 	globalStatus.RY835AI_connected = false
 }
@@ -1035,8 +1035,8 @@ func pollRY835AI() {
 }
 
 func initRY835AI() {
-	mySituation.mu_GPS = &sync.Mutex{}
-	mySituation.mu_Attitude = &sync.Mutex{}
+	mySituation.Mu_GPS = &sync.Mutex{}
+	mySituation.Mu_Attitude = &sync.Mutex{}
 
 	go pollRY835AI()
 }

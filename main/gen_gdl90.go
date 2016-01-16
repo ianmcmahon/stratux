@@ -405,7 +405,7 @@ func makeStratuxStatus() []byte {
 	// Valid and enabled flags.
 	// Valid/Enabled: GPS portion.
 	if isGPSValid() {
-		switch mySituation.quality {
+		switch mySituation.Quality {
 		case 1: // 1 = 3D GPS.
 			msg[13] = 1
 		case 2: // 2 = DGPS (SBAS /WAAS).
@@ -707,11 +707,11 @@ func updateStatus() {
 	globalStatus.GPS_satellites_seen = mySituation.SatellitesSeen
 	globalStatus.GPS_satellites_tracked = mySituation.SatellitesTracked
 	if isGPSValid() {
-		if mySituation.quality == 2 {
+		if mySituation.Quality == 2 {
 			globalStatus.GPS_solution = "DGPS (SBAS / WAAS)"
-		} else if mySituation.quality == 1 {
+		} else if mySituation.Quality == 1 {
 			globalStatus.GPS_solution = "3D GPS"
-		} else if mySituation.quality == 6 {
+		} else if mySituation.Quality == 6 {
 			globalStatus.GPS_solution = "Dead Reckoning"
 		} else {
 			globalStatus.GPS_solution = "No Fix"
@@ -1115,7 +1115,7 @@ func printStats() {
 		log.Printf(" - CPUTemp=%.02f deg C, MemStats.Alloc=%s, MemStats.Sys=%s, totalNetworkMessagesSent=%s\n", globalStatus.CPUTemp, humanize.Bytes(uint64(memstats.Alloc)), humanize.Bytes(uint64(memstats.Sys)), humanize.Comma(int64(totalNetworkMessagesSent)))
 		log.Printf(" - UAT/min %s/%s [maxSS=%.02f%%], ES/min %s/%s\n, Total traffic targets tracked=%s", humanize.Comma(int64(globalStatus.UAT_messages_last_minute)), humanize.Comma(int64(globalStatus.UAT_messages_max)), float64(maxSignalStrength)/10.0, humanize.Comma(int64(globalStatus.ES_messages_last_minute)), humanize.Comma(int64(globalStatus.ES_messages_max)), humanize.Comma(int64(len(seenTraffic))))
 		if globalSettings.GPS_Enabled {
-			log.Printf(" - Last GPS fix: %s, GPS solution type: %d using %d satellites (%d/%d seen/tracked), NACp: %d, est accuracy %.02f m\n", stratuxClock.HumanizeTime(mySituation.LastFixLocalTime), mySituation.quality, mySituation.Satellites, mySituation.SatellitesSeen, mySituation.SatellitesTracked, mySituation.NACp, mySituation.Accuracy)
+			log.Printf(" - Last GPS fix: %s, GPS solution type: %d using %d satellites (%d/%d seen/tracked), NACp: %d, est accuracy %.02f m\n", stratuxClock.HumanizeTime(mySituation.LastFixLocalTime), mySituation.Quality, mySituation.Satellites, mySituation.SatellitesSeen, mySituation.SatellitesTracked, mySituation.NACp, mySituation.Accuracy)
 			log.Printf(" - GPS vertical velocity: %.02f ft/sec; GPS vertical accuracy: %v m\n", mySituation.GPSVertVel, mySituation.AccuracyVert)
 		}
 	}
