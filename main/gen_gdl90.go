@@ -76,7 +76,7 @@ var stratuxVersion string
 var Crc16Table [256]uint16
 
 // Current AHRS, pressure altitude, etc.
-var mySituation *gps.SituationData = &gps.SituationData{}
+var mySituation *gps.SituationData = gps.NewSituation()
 
 type WriteCloser interface {
 	io.Writer

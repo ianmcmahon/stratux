@@ -32,11 +32,18 @@ type SituationData struct {
 	// From BMP180 pressure sensor.
 	Temp              float64
 	Pressure_alt      float64
-	LastTempPressTime time.Time
+	LngastTempPressTime time.Time
 
 	// From MPU6050 accel/gyro.
 	Pitch            float64
 	Roll             float64
 	Gyro_heading     float64
 	LastAttitudeTime time.Time
+}
+
+func NewSituation() *SituationData {
+	s := &SituationData{}
+	s.Mu_GPS = &sync.Mutex{}
+	s.Mu_Attitude = &sync.Mutex{}
+	return s
 }

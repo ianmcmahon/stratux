@@ -1035,8 +1035,5 @@ func pollRY835AI() {
 }
 
 func initRY835AI() {
-	mySituation.Mu_GPS = &sync.Mutex{}
-	mySituation.Mu_Attitude = &sync.Mutex{}
-
 	go pollRY835AI()
 }
