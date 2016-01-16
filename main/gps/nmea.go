@@ -126,6 +126,24 @@ func (n *NMEA) GPGGA() {
 
 	s.Lat = lat; s.Lng = lon
 
+	q, err := strconv.Atoi(n.Tokens[6]); if err != nil { return }
+	s.Quality = uint8(q)
+
+	sat, err := strconv.Atoi(n.Tokens[7]); if err != nil { return }
+	s.Satellites = uint16(sat)
+
+	hdop, err := strconv.ParseFloat(n.Tokens[8], 32); if err != nil { return }
+	s.Accuracy = float32(hdop * 4.0) // estimate for WAAS / DGPS solution
+	if s.Quality == 2 { s.Accuracy *= 2.0 } // doubles for non-WAAS solution
+
+	alt, err := strconv.ParseFloat(n.Tokens[9], 32); if err != nil { return }
+	s.Alt = float32(alt * 3.28084) // meters to feet
+
+	∆geoid, err := strconv.ParseFloat(n.Tokens[11], 32); if err != nil { return }
+	s.GeoidSep = float32(∆geoid * 3.28084) // meters to feet
+
+	// s.LastFixLocalTime = stratuxClock.Time 
+
 	log.Printf("Situation: %v\n", s)
 }
 
