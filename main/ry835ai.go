@@ -342,7 +342,7 @@ func processNMEALine(l string) bool {
 				return false
 			}
 
-			mySituation.lastFixSinceMidnightUTC = uint32((hr * 60 * 60) + (min * 60) + sec)
+			mySituation.LastFixSinceMidnightUTC = uint32((hr * 60 * 60) + (min * 60) + sec)
 
 			// field 3-4 = lat
 
@@ -518,7 +518,7 @@ func processNMEALine(l string) bool {
 			if err1 != nil || err2 != nil || err3 != nil {
 				return false
 			}
-			mySituation.lastFixSinceMidnightUTC = uint32((hr * 60 * 60) + (min * 60) + sec)
+			mySituation.LastFixSinceMidnightUTC = uint32((hr * 60 * 60) + (min * 60) + sec)
 
 			// field 3 is date
 
@@ -590,7 +590,7 @@ func processNMEALine(l string) bool {
 			return false
 		}
 
-		mySituation.lastFixSinceMidnightUTC = uint32((hr * 60 * 60) + (min * 60) + sec)
+		mySituation.LastFixSinceMidnightUTC = uint32((hr * 60 * 60) + (min * 60) + sec)
 
 		// Latitude.
 		if len(x[2]) < 4 {
@@ -892,7 +892,7 @@ func tempAndPressureReader() {
 		} else {
 			mySituation.Temp = temp
 			mySituation.Pressure_alt = alt
-			mySituation.lastTempPressTime = stratuxClock.Time
+			mySituation.LastTempPressTime = stratuxClock.Time
 		}
 	}
 	globalStatus.RY835AI_connected = false
@@ -989,7 +989,7 @@ func isAHRSValid() bool {
 }
 
 func isTempPressValid() bool {
-	return stratuxClock.Since(mySituation.lastTempPressTime) < 15*time.Second
+	return stratuxClock.Since(mySituation.LastTempPressTime) < 15*time.Second
 }
 
 func initAHRS() error {
