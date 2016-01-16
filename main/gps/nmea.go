@@ -100,7 +100,7 @@ func durationSinceMidnight(fixtime string) (int, error) {
 }
 
 func parseLatLon(s string, neg bool) (float32, error) {
-	minpos := len(s) - 5
+	minpos := len(s) - 7
 	deg, err := strconv.Atoi(s[0:minpos]); if err != nil { return 0.0, err }
 	min, err := strconv.ParseFloat(s[minpos:], 32); if err != nil { return 0.0, err }
 
